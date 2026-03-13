@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ì´ì©ì ì°¸ì¬ ì ê³ ì ë â íµê³ ëìë³´ë</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f0f2f5;
+    color: #1a1a2e;
+    min-height: 100vh;
+  }
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: white;
+    padding: 28px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
+  .header .date { font-size: 13px; opacity: 0.7; }
+  .header .badge {
+    background: rgba(255,255,255,0.15);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    backdrop-filter: blur(4px);
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  /* KPI Cards */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+  .kpi-card .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi-card .value { font-size: 32px; font-weight: 700; }
+  .kpi-card .sub { font-size: 11px; color: #aaa; margin-top: 4px; }
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .kpi-card.total::after { background: #1a1a2e; }
+  .kpi-card.total .value { color: #1a1a2e; }
+  .kpi-card.complete::after { background: #10b981; }
+  .kpi-card.complete .value { color: #10b981; }
+  .kpi-card.supplement::after { background: #f59e0b; }
+  .kpi-card.supplement .value { color: #f59e0b; }
+  .kpi-card.rejected::after { background: #ef4444; }
+  .kpi-card.rejected .value { color: #ef4444; }
+  .kpi-card.reporters::after { background: #6366f1; }
+  .kpi-card.reporters .value { color: #6366f1; }
+
+  /* Chart Grid */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .chart-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .chart-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .chart-card canvas { max-height: 260px; }
+
+  .chart-full {
+    grid-column: 1 / -1;
+  }
+
+  /* Table */
+  .table-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin-bottom: 24px;
+  }
+  .table-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 16px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: #f8f9fa;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 2px solid #e9ecef;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  tr:hover td { background: #fafbfc; }
+  .status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .status-ê²ì¦ìë£ { background: #d1fae5; color: #065f46; }
+  .status-ë³´ììì²­ { background: #fef3c7; color: #92400e; }
+  .status-ë°ë ¤ { background: #fee2e2; color: #991b1b; }
+  .status-ì ì { background: #dbeafe; color: #1e40af; }
+  .status-ê²ì¦ì¤ { background: #e0e7ff; color: #3730a3; }
+
+  .telecom-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .telecom-SKT { background: #fee2e2; color: #dc2626; }
+  .telecom-KT { background: #dbeafe; color: #2563eb; }
+  .telecom-LGU { background: #fce7f3; color: #db2777; }
+
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 11px;
+    color: #999;
+  }
+
+  @media (max-width: 768px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .chart-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>ì´ì©ì ì°¸ì¬ ì ê³ ì ë â ì´ì ëìë³´ë</h1>
+    <div class="date">2026ë 3ì 13ì¼ ê¸°ì¤ Â· ì¤ìê° API ë°ì´í°</div>
+  </div>
+  <div class="badge">ë°ì¹­ D+10 Â· íì¤í¸ê±´ ì ì¸</div>
+</div>
+
+<div class="container">
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <div class="kpi-card total">
+      <div class="label">ì´ ì ì</div>
+      <div class="value">8</div>
+      <div class="sub">ì¼íê·  0.9ê±´ (3/4~)</div>
+    </div>
+    <div class="kpi-card complete">
+      <div class="label">ê²ì¦ìë£</div>
+      <div class="value">2</div>
+      <div class="sub">25.0%</div>
+    </div>
+    <div class="kpi-card supplement">
+      <div class="label">ë³´ììì²­</div>
+      <div class="value">1</div>
+      <div class="sub">12.5%</div>
+    </div>
+    <div class="kpi-card rejected">
+      <div class="label">ë°ë ¤</div>
+      <div class="value">5</div>
+      <div class="sub">62.5%</div>
+    </div>
+    <div class="kpi-card reporters">
+      <div class="label">ì ê³ ì ì</div>
+      <div class="value">8</div>
+      <div class="sub">ì ì ìì´ì¸</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-grid">
+    <!-- ìíë³ ëë -->
+    <div class="chart-card">
+      <h3>ìíë³ ë¶í¬</h3>
+      <canvas id="statusChart"></canvas>
+    </div>
+
+    <!-- íµì ì¬ë³ -->
+    <div class="chart-card">
+      <h3>íµì ì¬ë³ ë¶í¬</h3>
+      <canvas id="telecomChart"></canvas>
+    </div>
+
+    <!-- ì¼ë³ ì ì ì¶ì´ -->
+    <div class="chart-card chart-full">
+      <h3>ì¼ë³ ì ì ì¶ì´ (2026ë 3ì)</h3>
+      <canvas id="dailyChart"></canvas>
+    </div>
+  </div>
+
+  <!-- ê°ë³ ê±´ íì´ë¸ -->
+  <div class="table-card">
+    <h3>ì ê³  ëª©ë¡ (8ê±´, íì¤í¸ê±´ ì ì¸)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>ì ìì¼</th>
+          <th>íµì ì¬</th>
+          <th>ìí</th>
+          <th>ë¹ê³ </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>2026-03-04</td><td><span class="telecom-badge telecom-KT">KT</span></td><td><span class="status-badge status-ë°ë ¤">ë°ë ¤</span></td><td></td></tr>
+        <tr><td>2</td><td>2026-03-05</td><td><span class="telecom-badge telecom-LGU">LGU+</span></td><td><span class="status-badge status-ë°ë ¤">ë°ë ¤</span></td><td></td></tr>
+        <tr><td>3</td><td>2026-03-08</td><td><span class="telecom-badge telecom-SKT">SKT</span></td><td><span class="status-badge status-ë°ë ¤">ë°ë ¤</span></td><td></td></tr>
+        <tr><td>4</td><td>2026-03-09</td><td><span class="telecom-badge telecom-KT">KT</span></td><td><span class="status-badge status-ë°ë ¤">ë°ë ¤</span></td><td></td></tr>
+        <tr><td>5</td><td>2026-03-11</td><td><span class="telecom-badge telecom-LGU">LGU+</span></td><td><span class="status-badge status-ê²ì¦ìë£">ê²ì¦ìë£</span></td><td>ì í¨ ì ê³ </td></tr>
+        <tr><td>6</td><td>2026-03-11</td><td><span class="telecom-badge telecom-SKT">SKT</span></td><td><span class="status-badge status-ê²ì¦ìë£">ê²ì¦ìë£</span></td><td>ì í¨ ì ê³ </td></tr>
+        <tr><td>7</td><td>2026-03-12</td><td><span class="telecom-badge telecom-KT">KT</span></td><td><span class="status-badge status-ë°ë ¤">ë°ë ¤</span></td><td></td></tr>
+        <tr><td>8</td><td>2026-03-12</td><td><span class="telecom-badge telecom-LGU">LGU+</span></td><td><span class="status-badge status-ë³´ììì²­">ë³´ììì²­</span></td><td>ë¯¸ì²ë¦¬ ìê±´</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ìì½ ë¶ì -->
+  <div class="table-card">
+    <h3>ì¢í© ë¶ì</h3>
+    <div style="font-size:14px; line-height:1.8; color:#444;">
+      <p><strong>ì ë ë°ì¹­ í ì¤ì  ì ê³  8ê±´ ì ì</strong> (ìµì´ íì¤í¸ê±´ 1ê±´ ì ì¸). 3/4ë¶í° ê¸°ì° ì ì¼íê·  ì½ 0.9ê±´ì¼ë¡ ì´ê¸° ìì°© ë¨ê³ìëë¤.</p>
+      <p style="margin-top:8px;">ë°ë ¤ì¨ 62.5% (5/8)ë¡ ëì í¸ì´ë, ìê±´ ë¯¸ì¶©ì¡± ê±´ì´ ë¤ììëë¤. 3/11 ì´í ì í¨ ì ê³ (ê²ì¦ìë£)ê° ëì¤ê¸° ììíì¼ë©°, ìµê·¼ ì¼ ì ìëì´ 2ê±´ì¼ë¡ ì¦ê°ì¸ë¥¼ ë³´ì´ê³  ììµëë¤.</p>
+      <p style="margin-top:8px;">íµì ì¬ë³ë¡ë KT 3ê±´, LGU+ 3ê±´, SKT 2ê±´ì¼ë¡ ë¹êµì  ê³ ë¥´ê² ë¶í¬ëì´ ììµëë¤.</p>
+      <p style="margin-top:8px; color:#f59e0b;"><strong>â  ë¯¸ì²ë¦¬ ìê±´: ë³´ììì²­ 1ê±´</strong> â ì¡°ìí ì²ë¦¬ íì</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  ì´ì©ì ì°¸ì¬ ì ê³ ì ë ì´ì ëìë³´ë Â· íêµ­íµì ì´ì©ìë³´í¸íí Â· ë°ì´í° ê¸°ì¤: 2026-03-13 17:18 KST
+</div>
+
+<script>
+// ìíë³ ëë
+new Chart(document.getElementById('statusChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['ë°ë ¤', 'ê²ì¦ìë£', 'ë³´ììì²­'],
+    datasets: [{
+      data: [5, 2, 1],
+      backgroundColor: ['#ef4444', '#10b981', '#f59e0b'],
+      borderWidth: 0,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    cutout: '60%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, font: { size: 12 } } }
+    }
+  }
+});
+
+// íµì ì¬ë³ ë°
+new Chart(document.getElementById('telecomChart'), {
+  type: 'bar',
+  data: {
+    labels: ['SKT', 'KT', 'LGU+'],
+    datasets: [{
+      label: 'ì ê³  ê±´ì',
+      data: [2, 3, 3],
+      backgroundColor: ['#ef4444', '#3b82f6', '#ec4899'],
+      borderRadius: 6,
+      barThickness: 48
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 5,
+        ticks: { stepSize: 1, font: { size: 11 } },
+        grid: { color: '#f0f0f0' }
+      },
+      x: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } }
+    }
+  }
+});
+
+// ì¼ë³ ì ì ì¶ì´
+const allDates = [];
+const startDate = new Date('2026-03-04');
+const endDate = new Date('2026-03-13');
+for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+  allDates.push(d.toISOString().slice(5, 10));
+}
+const dailyData = { '03-04': 1, '03-05': 1, '03-06': 0, '03-07': 0, '03-08': 1, '03-09': 1, '03-10': 0, '03-11': 2, '03-12': 2, '03-13': 0 };
+const dailyValues = allDates.map(d => dailyData[d] || 0);
+
+// ëì 
+let cumulative = 0;
+const cumulativeValues = dailyValues.map(v => { cumulative += v; return cumulative; });
+
+new Chart(document.getElementById('dailyChart'), {
+  type: 'bar',
+  data: {
+    labels: allDates.map(d => d.replace('-', '/')),
+    datasets: [
+      {
+        type: 'line',
+        label: 'ëì  ê±´ì',
+        data: cumulativeValues,
+        borderColor: '#6366f1',
+        backgroundColor: 'rgba(99,102,241,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        pointBackgroundColor: '#6366f1',
+        yAxisID: 'y1',
+        order: 0
+      },
+      {
+        type: 'bar',
+        label: 'ì¼ë³ ì ì',
+        data: dailyValues,
+        backgroundColor: dailyValues.map(v => v > 0 ? '#1a1a2e' : '#e5e7eb'),
+        borderRadius: 4,
+        barThickness: 28,
+        yAxisID: 'y',
+        order: 1
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { position: 'top', labels: { padding: 16, usePointStyle: true, font: { size: 11 } } }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 4,
+        ticks: { stepSize: 1, font: { size: 11 } },
+        grid: { color: '#f0f0f0' },
+        title: { display: true, text: 'ì¼ë³ ê±´ì', font: { size: 11 } }
+      },
+      y1: {
+        position: 'right',
+        beginAtZero: true,
+        max: 9,
+        ticks: { stepSize: 2, font: { size: 11 } },
+        grid: { display: false },
+        title: { display: true, text: 'ëì  ê±´ì', font: { size: 11 } }
+      },
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+</script>
+</body>
+</html>
