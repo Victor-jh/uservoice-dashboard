@@ -4,163 +4,136 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>이용자 참여 신고제도 — 통계 대시보드</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #f0f2f5;
-    color: #1a1a2e;
-    min-height: 100vh;
-  }
-  .header {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    color: white;
-    padding: 28px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .header h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
-  .header .date { font-size: 13px; opacity: 0.7; }
-  .header .badge {
-    background: rgba(255,255,255,0.15);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    backdrop-filter: blur(4px);
-  }
+:root {
+  --bg: #f0f2f5; --card: #ffffff; --header-bg: #1a1a2e;
+  --text: #1a1a2e; --text-sub: #6c757d; --text-on-dark: #fff;
+  --green: #10b981; --yellow: #f59e0b; --red: #ef4444;
+  --blue: #3b82f6; --indigo: #6366f1; --pink: #ec4899;
+  --gap: 16px; --radius: 12px;
+  --skt: #ef4444; --kt: #3b82f6; --lgu: #ec4899;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
-  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+/* Header */
+.header { background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%); color:var(--text-on-dark); padding:24px 32px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+.header h1 { font-size:21px; font-weight:600; letter-spacing:-0.5px; }
+.header .date { font-size:12px; opacity:.7; margin-top:2px; }
+.header .badge { background:rgba(255,255,255,.15); padding:6px 14px; border-radius:20px; font-size:11px; backdrop-filter:blur(4px); }
 
-  /* KPI Cards */
-  .kpi-row {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  .kpi-card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    transition: transform 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
-  .kpi-card .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-  .kpi-card .value { font-size: 32px; font-weight: 700; }
-  .kpi-card .sub { font-size: 11px; color: #aaa; margin-top: 4px; }
-  .kpi-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 3px;
-  }
-  .kpi-card.total::after { background: #1a1a2e; }
-  .kpi-card.total .value { color: #1a1a2e; }
-  .kpi-card.complete::after { background: #10b981; }
-  .kpi-card.complete .value { color: #10b981; }
-  .kpi-card.supplement::after { background: #f59e0b; }
-  .kpi-card.supplement .value { color: #f59e0b; }
-  .kpi-card.rejected::after { background: #ef4444; }
-  .kpi-card.rejected .value { color: #ef4444; }
-  .kpi-card.reporters::after { background: #6366f1; }
-  .kpi-card.reporters .value { color: #6366f1; }
+.container { max-width:1280px; margin:0 auto; padding:20px; }
 
-  /* Chart Grid */
-  .chart-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 24px;
-  }
-  .chart-card {
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  }
-  .chart-card h3 {
-    font-size: 14px;
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  .chart-card canvas { max-height: 260px; }
+/* Filters */
+.filter-bar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; background:var(--card); border-radius:var(--radius); padding:14px 20px; margin-bottom:var(--gap); box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.filter-bar label { font-size:12px; color:var(--text-sub); font-weight:600; text-transform:uppercase; letter-spacing:.3px; }
+.filter-bar select, .filter-bar input[type="date"] { padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px; background:#fff; color:var(--text); cursor:pointer; }
+.filter-bar select:focus, .filter-bar input:focus { outline:none; border-color:var(--indigo); box-shadow:0 0 0 2px rgba(99,102,241,.15); }
+.filter-group { display:flex; align-items:center; gap:5px; }
+.filter-reset { padding:6px 14px; border:none; border-radius:6px; background:#e5e7eb; color:var(--text); font-size:12px; font-weight:600; cursor:pointer; margin-left:auto; transition:background .2s; }
+.filter-reset:hover { background:#d1d5db; }
+.active-filters { font-size:11px; color:var(--indigo); font-weight:600; }
 
-  .chart-full {
-    grid-column: 1 / -1;
-  }
+/* KPI Cards */
+.kpi-row { display:grid; grid-template-columns:repeat(5,1fr); gap:var(--gap); margin-bottom:var(--gap); }
+.kpi-card { background:var(--card); border-radius:var(--radius); padding:18px 16px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,.08); cursor:pointer; transition:all .2s; position:relative; overflow:hidden; border:2px solid transparent; }
+.kpi-card:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,0,0,.12); }
+.kpi-card.active { border-color:var(--indigo); box-shadow:0 0 0 3px rgba(99,102,241,.2); }
+.kpi-card .label { font-size:11px; color:#888; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+.kpi-card .value { font-size:30px; font-weight:700; transition:all .3s; }
+.kpi-card .sub { font-size:11px; color:#aaa; margin-top:3px; }
+.kpi-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; }
+.kpi-card[data-kpi="total"]::after { background:var(--header-bg); }
+.kpi-card[data-kpi="total"] .value { color:var(--header-bg); }
+.kpi-card[data-kpi="겁증완료"]::after { background:var(--green); }
+.kpi-card[data-kpi="검증완료"] .value { color:var(--green); }
+.kpi-card[data-kpi="보완요청"]::after { background:var(--yellow); }
+.kpi-card[data-kpi="보완요청"] .value { color:var(--yellow); }
+.kpi-card[data-kpi="반려"]::after { background:var(--red); }
+.kpi-card[data-kpi="반려"] .value { color:var(--red); }
+.kpi-card[data-kpi="reporters"]::after { background:var(--indigo); }
+.kpi-card[data-kpi="reporters"] .value { color:var(--indigo); }
+.kpi-card .click-hint { font-size:10px; color:#bbb; margin-top:4px; opacity:0; transition:opacity .2s; }
+.kpi-card:hover .click-hint { opacity:1; }
 
-  /* Table */
-  .table-card {
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    margin-bottom: 24px;
-  }
-  .table-card h3 {
-    font-size: 14px;
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 16px;
-  }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th {
-    background: #f8f9fa;
-    padding: 10px 14px;
-    text-align: left;
-    font-weight: 600;
-    color: #555;
-    border-bottom: 2px solid #e9ecef;
-  }
-  td {
-    padding: 10px 14px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  tr:hover td { background: #fafbfc; }
-  .status-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .status-검증완료 { background: #d1fae5; color: #065f46; }
-  .status-보완요청 { background: #fef3c7; color: #92400e; }
-  .status-반려 { background: #fee2e2; color: #991b1b; }
-  .status-접수 { background: #dbeafe; color: #1e40af; }
-  .status-검증중 { background: #e0e7ff; color: #3730a3; }
+/* Charts */
+.chart-grid { display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); margin-bottom:var(--gap); }
+.chart-card { background:var(--card); border-radius:var(--radius); padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.08); position:relative; }
+.chart-card h3 { font-size:13px; font-weight:600; color:#444; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center; }
+.chart-card canvas { max-height:260px; }
+.chart-full { grid-column:1/-1; }
+.chart-empty { display:flex; align-items:center; justify-content:center; height:200px; color:#ccc; font-size:14px; }
 
-  .telecom-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .telecom-SKT { background: #fee2e2; color: #dc2626; }
-  .telecom-KT { background: #dbeafe; color: #2563eb; }
-  .telecom-LGU { background: #fce7f3; color: #db2777; }
+/* Cross-tab */
+.crosstab { width:100%; border-collapse:collapse; font-size:13px; margin-top:8px; }
+.crosstab th { background:#f8f9fa; padding:8px 12px; text-align:center; font-weight:600; color:#555; border:1px solid #e9ecef; font-size:12px; }
+.crosstab td { padding:8px 12px; text-align:center; border:1px solid #f0f0f0; }
+.crosstab td.highlight { background:#eef2ff; font-weight:700; color:var(--indigo); }
+.crosstab tr:last-child td { font-weight:700; background:#f8f9fa; }
+.crosstab td:last-child { font-weight:700; background:#f8f9fa; }
 
-  .footer {
-    text-align: center;
-    padding: 20px;
-    font-size: 11px;
-    color: #999;
-  }
+/* Table */
+.table-card { background:var(--card); border-radius:var(--radius); padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.08); margin-bottom:var(--gap); overflow-x:auto; }
+.table-card h3 { font-size:13px; font-weight:600; color:#444; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
+.table-card .count-badge { background:var(--indigo); color:#fff; padding:2px 10px; border-radius:12px; font-size:11px; }
+table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
+table.data-table th { background:#f8f9fa; padding:10px 12px; text-align:left; font-weight:600; color:#555; border-bottom:2px solid #e9ecef; cursor:pointer; user-select:none; white-space:nowrap; font-size:12px; }
+table.data-table th:hover { background:#eef2ff; }
+table.data-table th .sort-icon { font-size:10px; margin-left:3px; opacity:.4; }
+table.data-table th.sorted .sort-icon { opacity:1; color:var(--indigo); }
+table.data-table td { padding:10px 12px; border-bottom:1px solid #f0f0f0; }
+table.data-table tr { transition:background .15s; }
+table.data-table tr:hover td { background:#fafbfc; }
+table.data-table tr.highlighted td { background:#eef2ff; }
+.status-badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+.status-검증완료 { background:#d1fae5; color:#065f46; }
+.status-보완요청 { background:#fef3c7; color:#92400e; }
+.status-반려 { background:#fee2e2; color:#991b1b; }
+.status-접수 { background:#dbeafe; color:#1e40af; }
+.status-검증중 { background:#e0e7ff; color:#3730a3; }
+.telecom-badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; }
+.telecom-SKT { background:#fee2e2; color:#dc2626; }
+.telecom-KT { background:#dbeafe; color:#2563eb; }
+.telecom-LGU { background:#fce7f3; color:#db2777; }
 
-  @media (max-width: 768px) {
-    .kpi-row { grid-template-columns: repeat(2, 1fr); }
-    .chart-grid { grid-template-columns: 1fr; }
-  }
+/* Modal / Drill-down Panel */
+.drill-panel { display:none; position:fixed; top:0; right:0; width:420px; height:100vh; background:#fff; box-shadow:-4px 0 24px rgba(0,0,0,.15); z-index:1000; overflow-y:auto; transition:transform .3s; }
+.drill-panel.open { display:block; animation:slideIn .25s ease-out; }
+@keyframes slideIn { from { transform:translateX(100%); } to { transform:translateX(0); } }
+.drill-panel .panel-header { background:var(--header-bg); color:#fff; padding:18px 20px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:1; }
+.drill-panel .panel-header h3 { font-size:15px; }
+.drill-panel .panel-close { background:none; border:none; color:#fff; font-size:22px; cursor:pointer; padding:4px 8px; border-radius:4px; }
+.drill-panel .panel-close:hover { background:rgba(255,255,255,.15); }
+.drill-panel .panel-body { padding:20px; }
+.drill-panel .detail-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0f0f0; font-size:13px; }
+.drill-panel .detail-label { color:var(--text-sub); font-weight:500; }
+.drill-panel .detail-value { font-weight:600; }
+.drill-panel .mini-chart { margin:16px 0; }
+.drill-panel .mini-chart canvas { max-height:180px; }
+.overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.3); z-index:999; }
+.overlay.open { display:block; }
+
+/* Analysis Section */
+.analysis-card { background:var(--card); border-radius:var(--radius); padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.08); margin-bottom:var(--gap); }
+.analysis-card h3 { font-size:13px; font-weight:600; color:#444; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #f0f0f0; }
+.analysis-card p { font-size:13px; line-height:1.8; color:#444; margin-bottom:6px; }
+.analysis-card .warning { color:var(--yellow); font-weight:600; }
+
+.footer { text-align:center; padding:16px; font-size:11px; color:#999; }
+
+/* Tooltip override */
+.chart-click-hint { font-size:10px; color:#bbb; font-weight:400; }
+
+@media (max-width:900px) {
+  .kpi-row { grid-template-columns:repeat(3,1fr); }
+  .chart-grid { grid-template-columns:1fr; }
+  .drill-panel { width:100%; }
+}
+@media (max-width:600px) {
+  .kpi-row { grid-template-columns:repeat(2,1fr); }
+  .filter-bar { flex-direction:column; align-items:stretch; }
+}
 </style>
 </head>
 <body>
@@ -168,228 +141,681 @@
 <div class="header">
   <div>
     <h1>이용자 참여 신고제도 — 운영 대시보드</h1>
-    <div class="date">2026년 3월 13일 기준 · 실시간 API 데이터</div>
+    <div class="date">2026년 3월 13일 기준 · 스냅샷 데이터</div>
   </div>
   <div class="badge">런칭 D+10 · 테스트건 제외</div>
 </div>
 
 <div class="container">
 
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>통신사</label>
+      <select id="f-telecom" onchange="DB.applyFilters()">
+        <option value="all">전체</option>
+        <option value="SKT">SKT</option>
+        <option value="KT">KT</option>
+        <option value="LGU+">LGU+</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>상태</label>
+      <select id="f-status" onchange="DB.applyFilters()">
+        <option value="all">전체</option>
+        <option value="검증완료">검증완료</option>
+        <option value="보완요청">보완요청</option>
+        <option value="반려">반려</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>기간</label>
+      <input type="date" id="f-start" value="2026-03-04" onchange="DB.applyFilters()">
+      <span style="color:#aaa;">~</span>
+      <input type="date" id="f-end" value="2026-03-13" onchange="DB.applyFilters()">
+    </div>
+    <span class="active-filters" id="active-filters"></span>
+    <button class="filter-reset" onclick="DB.resetFilters()">초기화</button>
+  </div>
+
   <!-- KPI Cards -->
-  <div class="kpi-row">
-    <div class="kpi-card total">
+  <div class="kpi-row" id="kpi-row">
+    <div class="kpi-card" data-kpi="total" onclick="DB.drillKPI('total')">
       <div class="label">총 접수</div>
-      <div class="value">8</div>
-      <div class="sub">일평균 0.9건 (3/4~)</div>
+      <div class="value" id="kpi-total">8</div>
+      <div class="sub" id="kpi-total-sub">일평균 0.9건</div>
+      <div class="click-hint">클릭하여 상세보기</div>
     </div>
-    <div class="kpi-card complete">
+    <div class="kpi-card" data-kpi="검증완료" onclick="DB.drillKPI('검증완료')">
       <div class="label">검증완료</div>
-      <div class="value">2</div>
-      <div class="sub">25.0%</div>
+      <div class="value" id="kpi-complete">2</div>
+      <div class="sub" id="kpi-complete-sub">25.0%</div>
+      <div class="click-hint">클릭하여 상세보기</div>
     </div>
-    <div class="kpi-card supplement">
+    <div class="kpi-card" data-kpi="보완요청" onclick="DB.drillKPI('보완요청')">
       <div class="label">보완요청</div>
-      <div class="value">1</div>
-      <div class="sub">12.5%</div>
+      <div class="value" id="kpi-supplement">1</div>
+      <div class="sub" id="kpi-supplement-sub">12.5%</div>
+      <div class="click-hint">클릭하여 상세보기</div>
     </div>
-    <div class="kpi-card rejected">
+    <div class="kpi-card" data-kpi="반려" onclick="DB.drillKPI('반려')">
       <div class="label">반려</div>
-      <div class="value">5</div>
-      <div class="sub">62.5%</div>
+      <div class="value" id="kpi-rejected">5</div>
+      <div class="sub" id="kpi-rejected-sub">62.5%</div>
+      <div class="click-hint">클릭하여 상세보기</div>
     </div>
-    <div class="kpi-card reporters">
+    <div class="kpi-card" data-kpi="reporters" onclick="DB.drillKPI('reporters')">
       <div class="label">신고자 수</div>
-      <div class="value">8</div>
-      <div class="sub">전원 상이인</div>
+      <div class="value" id="kpi-reporters">8</div>
+      <div class="sub" id="kpi-reporters-sub">전원 상이인</div>
+      <div class="click-hint">클릭하여 상세보기</div>
     </div>
   </div>
 
-  <!-- Charts -->
+  <!-- Charts Row 1 -->
   <div class="chart-grid">
-    <!-- 상태별 도넛 -->
     <div class="chart-card">
-      <h3>상태별 분포</h3>
+      <h3>상태별 분포 <span class="chart-click-hint">클릭: 필터 적용</span></h3>
       <canvas id="statusChart"></canvas>
     </div>
-
-    <!-- 통신사별 -->
     <div class="chart-card">
-      <h3>통신사별 분포</h3>
+      <h3>통신사별 분포 <span class="chart-click-hint">클릭: 필터 적용</span></h3>
       <canvas id="telecomChart"></canvas>
     </div>
+  </div>
 
-    <!-- 일별 접수 추이 -->
+  <!-- Charts Row 2: Cross-tab + Trend -->
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>통신사 × 상태 교차분석</h3>
+      <div id="crosstab-container"></div>
+    </div>
+    <div class="chart-card">
+      <h3>통신사별 상태 분포 (스택바)</h3>
+      <canvas id="stackedChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Daily Trend (full width) -->
+  <div class="chart-grid">
     <div class="chart-card chart-full">
       <h3>일별 접수 추이 (2026년 3월)</h3>
       <canvas id="dailyChart"></canvas>
     </div>
   </div>
 
-  <!-- 개별 건 테이블 -->
-  <div class="table-card">
-    <h3>신고 목록 (8건, 테스트건 제외)</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>접수일</th>
-          <th>통신사</th>
-          <th>상태</th>
-          <th>비고</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>1</td><td>2026-03-04</td><td><span class="telecom-badge telecom-KT">KT</span></td><td><span class="status-badge status-반려">반려</span></td><td></td></tr>
-        <tr><td>2</td><td>2026-03-05</td><td><span class="telecom-badge telecom-LGU">LGU+</span></td><td><span class="status-badge status-반려">반려</span></td><td></td></tr>
-        <tr><td>3</td><td>2026-03-08</td><td><span class="telecom-badge telecom-SKT">SKT</span></td><td><span class="status-badge status-반려">반려</span></td><td></td></tr>
-        <tr><td>4</td><td>2026-03-09</td><td><span class="telecom-badge telecom-KT">KT</span></td><td><span class="status-badge status-반려">반려</span></td><td></td></tr>
-        <tr><td>5</td><td>2026-03-11</td><td><span class="telecom-badge telecom-LGU">LGU+</span></td><td><span class="status-badge status-검증완료">검증완료</span></td><td>유효 신고</td></tr>
-        <tr><td>6</td><td>2026-03-11</td><td><span class="telecom-badge telecom-SKT">SKT</span></td><td><span class="status-badge status-검증완료">검증완료</span></td><td>유효 신고</td></tr>
-        <tr><td>7</td><td>2026-03-12</td><td><span class="telecom-badge telecom-KT">KT</span></td><td><span class="status-badge status-반려">반려</span></td><td></td></tr>
-        <tr><td>8</td><td>2026-03-12</td><td><span class="telecom-badge telecom-LGU">LGU+</span></td><td><span class="status-badge status-보완요청">보완요청</span></td><td>미처리 잔건</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- 요약 분석 -->
-  <div class="table-card">
-    <h3>종합 분석</h3>
-    <div style="font-size:14px; line-height:1.8; color:#444;">
-      <p><strong>제도 런칭 후 실제 신고 8건 접수</strong> (최초 테스트건 1건 제외). 3/4부터 기산 시 일평균 약 0.9건으로 초기 안착 단계입니다.</p>
-      <p style="margin-top:8px;">반려율 62.5% (5/8)로 높은 편이나, 요건 미충족 건이 다수입니다. 3/11 이후 유효 신고(검증완료)가 나오기 시작했으며, 최근 일 접수량이 2건으로 증가세를 보이고 있습니다.</p>
-      <p style="margin-top:8px;">통신사별로는 KT 3건, LGU+ 3건, SKT 2건으로 비교적 고르게 분포되어 있습니다.</p>
-      <p style="margin-top:8px; color:#f59e0b;"><strong>⚠ 미처리 잔건: 보완요청 1건</strong> — 조속한 처리 필요</p>
+  <!-- Weekly / Processing Analysis -->
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>주차별 접수 추이</h3>
+      <canvas id="weeklyChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>반려 비율 추이 (3일 이동평균)</h3>
+      <canvas id="rejectionTrendChart"></canvas>
     </div>
   </div>
 
+  <!-- Data Table -->
+  <div class="table-card">
+    <h3>
+      신고 목록
+      <span class="count-badge" id="table-count">8건</span>
+    </h3>
+    <table class="data-table" id="data-table">
+      <thead>
+        <tr>
+          <th data-col="no" onclick="DB.sortBy('no')"># <span class="sort-icon">▼</span></th>
+          <th data-col="date" onclick="DB.sortBy('date')">접순일 <span class="sort-icon">▼</span></th>
+          <th data-col="telecom" onclick="DB.sortBy('telecom')">통신사 <span class="sort-icon">▼</span></th>
+          <th data-col="status" onclick="DB.sortBy('status')">상태 <span class="sort-icon">▼</span></th>
+          <th data-col="note">비고</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Analysis -->
+  <div class="analysis-card" id="analysis-section">
+    <h3>종합 분석</h3>
+    <div id="analysis-content"></div>
+  </div>
+
+</div>
+
+<!-- Drill-down Panel -->
+<div class="overlay" id="overlay" onclick="DB.closeDrill()"></div>
+<div class="drill-panel" id="drill-panel">
+  <div class="panel-header">
+    <h3 id="drill-title">상세 보기</h3>
+    <button class="panel-close" onclick="DB.closeDrill()">×</button>
+  </div>
+  <div class="panel-body" id="drill-body"></div>
 </div>
 
 <div class="footer">
-  이용자 참여 신고제도 운영 대시보드 · 한국통술이용자보호협회 · 데이터 기준: 2026-03-13 17:18 KST
+  이용자 참여 신고제도 운옑 대시보드 · 한국튵신이용자보호협회 · 2026-03-13 기준
 </div>
 
 <script>
-// 상태별 도넛
-new Chart(document.getElementById('statusChart'), {
-  type: 'doughnut',
-  data: {
-    labels: ['반려', '검증완료', '보완요청'],
-    datasets: [{
-      data: [5, 2, 1],
-      backgroundColor: ['#ef4444', '#10b981', '#f59e0b'],
-      borderWidth: 0,
-      hoverOffset: 8
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: true,
-    cutout: '60%',
-    plugins: {
-      legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, font: { size: 12 } } }
-    }
-  }
-});
+// === DATA ===
+const CASES = [
+  { no:1, date:'2026-03-04', telecom:'KT',   status:'반려',   note:'' },
+  { no:2, date:'2026-03-05', telecom:'LGU+',  status:'반려',   note:'' },
+  { no:3, date:'2026-03-08', telecom:'SKT',   status:'반려',   note:'' },
+  { no:4, date:'2026-03-09', telecom:'KT',    status:'반려',   note:'' },
+  { no:5, date:'2026-03-11', telecom:'LGU+',  status:'검증완료', note:'유효 신고' },
+  { no:6, date:'2026-03-11', telecom:'SKT',   status:'검증완료', note:'유효 신고' },
+  { no:7, date:'2026-03-12', telecom:'KT',    status:'반려',   note:'' },
+  { no:8, date:'2026-03-12', telecom:'LGU+',  status:'보완요청', note:'미처리 잔건' }
+];
 
-// 통신사별 바
-new Chart(document.getElementById('telecomChart'), {
-  type: 'bar',
-  data: {
-    labels: ['SKT', 'KT', 'LGU+'],
-    datasets: [{
-      label: '신고 건수',
-      data: [2, 3, 3],
-      backgroundColor: ['#ef4444', '#3b82f6', '#ec4899'],
-      borderRadius: 6,
-      barThickness: 48
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: true,
-    plugins: { legend: { display: false } },
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 5,
-        ticks: { stepSize: 1, font: { size: 11 } },
-        grid: { color: '#f0f0f0' }
-      },
-      x: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } }
-    }
-  }
-});
+const STATUS_COLORS = { '검증완료':'#10b981', '보완요청':'#f59e0b', '반려':'#ef4444', '접수':'#3b82f6', '검증중':'#6366f1' };
+const TELECOM_COLORS = { 'SKT':'#ef4444', 'KT':'#3b82f6', 'LGU+':'#ec4899' };
+const ALL_STATUSES = ['검증완료','보완요청','반려'];
+const ALL_TELECOMS = ['SKT','KT','LGU+'];
 
-// 일별 접수 추이
-const allDates = [];
-const startDate = new Date('2026-03-04');
-const endDate = new Date('2026-03-13');
-for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-  allDates.push(d.toISOString().slice(5, 10));
+// Generate all dates in range
+function dateRange(start, end) {
+  const dates = []; const d = new Date(start);
+  while (d <= new Date(end)) { dates.push(d.toISOString().slice(0,10)); d.setDate(d.getDate()+1); }
+  return dates;
 }
-const dailyData = { '03-04': 1, '03-05': 1, '03-06': 0, '03-07': 0, '03-08': 1, '03-09': 1, '03-10': 0, '03-11': 2, '03-12': 2, '03-13': 0 };
-const dailyValues = allDates.map(d => dailyData[d] || 0);
+const ALL_DATES = dateRange('2026-03-04','2026-03-13');
 
-// 누적
-let cumulative = 0;
-const cumulativeValues = dailyValues.map(v => { cumulative += v; return cumulative; });
+// === DASHBOARD CLASS ===
+class Dashboard {
+  constructor() {
+    this.filtered = [...CASES];
+    this.charts = {};
+    this.sortCol = 'no'; this.sortDir = 'asc';
+    this.activeKPI = null;
+    this.drillChart = null;
+    this.init();
+  }
 
-new Chart(document.getElementById('dailyChart'), {
-  type: 'bar',
-  data: {
-    labels: allDates.map(d => d.replace('-', '/')),
-    datasets: [
-      {
-        type: 'line',
-        label: '누적 건수',
-        data: cumulativeValues,
-        borderColor: '#6366f1',
-        backgroundColor: 'rgba(99,102,241,0.1)',
-        fill: true,
-        tension: 0.3,
-        pointRadius: 4,
-        pointBackgroundColor: '#6366f1',
-        yAxisID: 'y1',
-        order: 0
-      },
-      {
-        type: 'bar',
-        label: '일별 접수',
-        data: dailyValues,
-        backgroundColor: dailyValues.map(v => v > 0 ? '#1a1a2e' : '#e5e7eb'),
-        borderRadius: 4,
-        barThickness: 28,
-        yAxisID: 'y',
-        order: 1
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: true,
-    plugins: {
-      legend: { position: 'top', labels: { padding: 16, usePointStyle: true, font: { size: 11 } } }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 4,
-        ticks: { stepSize: 1, font: { size: 11 } },
-        grid: { color: '#f0f0f0' },
-        title: { display: true, text: '일별 건수', font: { size: 11 } }
-      },
-      y1: {
-        position: 'right',
-        beginAtZero: true,
-        max: 9,
-        ticks: { stepSize: 2, font: { size: 11 } },
-        grid: { display: false },
-        title: { display: true, text: '누적 건수', font: { size: 11 } }
-      },
-      x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+  init() {
+    this.renderAll();
+  }
+
+  // -- Filters --
+  getFilters() {
+    const t = document.getElementById('f-telecom').value;
+    const s = document.getElementById('f-status').value;
+    const ds = document.getElementById('f-start').value;
+    const de = document.getElementById('f-end').value;
+    return { telecom: t==='all'?null:t, status: s==='all'?null:s, dateStart: ds, dateEnd: de };
+  }
+
+  applyFilters() {
+    const f = this.getFilters();
+    this.filtered = CASES.filter(c => {
+      if (f.telecom && c.telecom !== f.telecom) return false;
+      if (f.status && c.status !== f.status) return false;
+      if (f.dateStart && c.date < f.dateStart) return false;
+      if (f.dateEnd && c.date > f.dateEnd) return false;
+      return true;
+    });
+    // Show active filter count
+    let count = 0;
+    if (f.telecom) count++;
+    if (f.status) count++;
+    if (f.dateStart !== '2026-03-04' || f.dateEnd !== '2026-03-13') count++;
+    document.getElementById('active-filters').textContent = count ? `필터 ${count}개 적용 중` : '';
+    this.activeKPI = null;
+    document.querySelectorAll('.kpi-card').forEach(el => el.classList.remove('active'));
+    this.renderAll();
+  }
+
+  resetFilters() {
+    document.getElementById('f-telecom').value = 'all';
+    document.getElementById('f-status').value = 'all';
+    document.getElementById('f-start').value = '2026-03-04';
+    document.getElementById('f-end').value = '2026-03-13';
+    this.applyFilters();
+  }
+
+  // -- KPI Drill-down --
+  drillKPI(type) {
+    // Toggle active state
+    document.querySelectorAll('.kpi-card').forEach(el => el.classList.remove('active'));
+    if (this.activeKPI === type) {
+      this.activeKPI = null;
+      this.applyFilters();
+      return;
+    }
+    this.activeKPI = type;
+    document.querySelector(`.kpi-card[data-kpi="${type}"]`).classList.add('active');
+
+    // Filter based on KPI type
+    if (type === 'total' || type === 'reporters') {
+      // Show all (just highlight)
+      this.openDrill(type);
+    } else {
+      document.getElementById('f-status').value = type;
+      this.applyFilters();
+      document.querySelector(`.kpi-card[data-kpi="${type}"]`).classList.add('active');
+      this.activeKPI = type;
+      this.openDrill(type);
     }
   }
-});
+
+  openDrill(type) {
+    const panel = document.getElementById('drill-panel');
+    const overlay = document.getElementById('overlay');
+    const title = document.getElementById('drill-title');
+    const body = document.getElementById('drill-body');
+
+    let html = '';
+    const data = this.filtered;
+    const total = CASES.length;
+
+    if (type === 'total') {
+      title.textContent = '총 접수 현황 상세';
+      const days = ALL_DATES.length;
+      const avg = (data.length / days).toFixed(1);
+      html += `<div class="detail-row"><span class="detail-label">총 접수 건수</span><span class="detail-value">${data.length}건</span></div>`;
+      html += `<div class="detail-row"><span class="detail-label">일평균 접수</span><span class="detail-value">${avg}건/일</span></div>`;
+      html += `<div class="detail-row"><span class="detail-label">운영 기간</span><span class="detail-value">${ALL_DATES[0]} ~ ${ALL_DATES[ALL_DATES.length-1]}</span></div>`;
+      html += `<div class="detail-row"><span class="detail-label">최다 접수일</span><span class="detail-value">3/11, 3/12 (각 2건)</span></div>`;
+      html += '<div class="mini-chart"><canvas id="drill-mini-chart"></canvas></div>';
+      html += '<h4 style="font-size:13px;margin:12px 0 8px;color:#444;">통신사별 비중</h4>';
+      ALL_TELECOMS.forEach(t => {
+        const cnt = data.filter(c=>c.telecom===t).length;
+        const pct = total ? ((cnt/total)*100).toFixed(1) : 0;
+        html += `<div class="detail-row"><span class="detail-label">${t}</span><span class="detail-value">${cnt}건 (${pct}%)</span></div>`;
+      });
+    } else if (type === 'reporters') {
+      title.textContent = '신고자 분석';
+      html += `<div class="detail-row"><span class="detail-label">총 신고자 수</span><span class="detail-value">${data.length}명</span></div>`;
+      html += `<div class="detail-row"><span class="detail-label">중복 신고자</span><span class="detail-value">없음 (전원 상이인)</span></div>`;
+      html += `<div class="detail-row"><span class="detail-label">1인당 평균 신고</span><span class="detail-value">1.0건</span></div>`;
+      html += '<div class="mini-chart"><canvas id="drill-mini-chart"></canvas></div>';
+      html += '<p style="font-size:12px;color:#888;margin-top:12px;">※ 개인정보 보호를 위해 신고자 개인 식별 정보는 표시하지 않습니다.</p>';
+    } else {
+      title.textContent = `${type} 상세 (${data.length}건)`;
+      const pct = total ? ((data.length/total)*100).toFixed(1) : 0;
+      html += `<div class="detail-row"><span class="detail-label">건수</span><span class="detail-value">${data.length}건 / ${total}건</span></div>`;
+      html += `<div class="detail-row"><span class="detail-label">비율</span><span class="detail-value">${pct}%</span></div>`;
+      html += '<div class="mini-chart"><canvas id="drill-mini-chart"></canvas></div>';
+      html += '<h4 style="font-size:13px;margin:12px 0 8px;color:#444;">해당 건 목록</h4>';
+      data.forEach(c => {
+        html += `<div class="detail-row"><span class="detail-label">#${c.no} · ${c.date}</span><span class="detail-value"><span class="telecom-badge telecom-${c.telecom==='LGU+'?'LGU':c.telecom}">${c.telecom}</span></span></div>`;
+      });
+    }
+
+    body.innerHTML = html;
+    panel.classList.add('open');
+    overlay.classList.add('open');
+
+    // Render mini chart after DOM update
+    setTimeout(() => this.renderDrillChart(type, data), 50);
+  }
+
+  renderDrillChart(type, data) {
+    const canvas = document.getElementById('drill-mini-chart');
+    if (!canvas) return;
+    if (this.drillChart) { this.drillChart.destroy(); this.drillChart = null; }
+
+    if (type === 'total' || type === 'reporters') {
+      // Daily bar
+      const counts = {};
+      data.forEach(c => { counts[c.date] = (counts[c.date]||0)+1; });
+      this.drillChart = new Chart(canvas, {
+        type:'bar', data: {
+          labels: ALL_DATES.map(d=>d.slice(5).replace('-','/')),
+          datasets:[{ data: ALL_DATES.map(d=>counts[d]||0), backgroundColor: ALL_DATES.map(d=>(counts[d]||0)>0?'#6366f1':'#e5e7eb'), borderRadius:4, barThickness:18 }]
+        }, options: { responsive:true, maintainAspectRatio:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,ticks:{stepSize:1}},x:{grid:{display:false}}} }
+      });
+    } else {
+      // Telecom breakdown for this status
+      const tcCounts = {};
+      data.forEach(c => { tcCounts[c.telecom] = (tcCounts[c.telecom]||0)+1; });
+      this.drillChart = new Chart(canvas, {
+        type:'doughnut', data: {
+          labels: Object.keys(tcCounts),
+          datasets:[{ data: Object.values(tcCounts), backgroundColor: Object.keys(tcCounts).map(t=>TELECOM_COLORS[t]), borderWidth:0 }]
+        }, options: { responsive:true, maintainAspectRatio:true, cutout:'55%', plugins:{legend:{position:'bottom',labels:{padding:12,usePointStyle:true,font:{size:11}}}} }
+      });
+    }
+  }
+
+  closeDrill() {
+    document.getElementById('drill-panel').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+    if (this.drillChart) { this.drillChart.destroy(); this.drillChart = null; }
+  }
+
+  // -- Render All --
+  renderAll() {
+    this.renderKPIs();
+    this.renderStatusChart();
+    this.renderTelecomChart();
+    this.renderCrossTab();
+    this.renderStackedChart();
+    this.renderDailyChart();
+    this.renderWeeklyChart();
+    this.renderRejectionTrend();
+    this.renderTable();
+    this.renderAnalysis();
+  }
+
+  // -- KPIs --
+  renderKPIs() {
+    const d = this.filtered; const t = d.length;
+    const complete = d.filter(c=>c.status==='검증완료').length;
+    const supp = d.filter(c=>c.status==='보완요청').length;
+    const rej = d.filter(c=>c.status==='반려').length;
+    const reporters = new Set(d.map(c=>c.no)).size; // approximation
+    const days = ALL_DATES.length;
+
+    document.getElementById('kpi-total').textContent = t;
+    document.getElementById('kpi-total-sub').textContent = `일평균 ${(t/days).toFixed(1)}건`;
+    document.getElementById('kpi-complete').textContent = complete;
+    document.getElementById('kpi-complete-sub').textContent = t ? `${((complete/t)*100).toFixed(1)}%` : '0%';
+    document.getElementById('kpi-supplement').textContent = supp;
+    document.getElementById('kpi-supplement-sub').textContent = t ? `${((supp/t)*100).toFixed(1)}%` : '0%';
+    document.getElementById('kpi-rejected').textContent = rej;
+    document.getElementById('kpi-rejected-sub').textContent = t ? `${((rej/t)*100).toFixed(1)}%` : '0%';
+    document.getElementById('kpi-reporters').textContent = reporters;
+    document.getElementById('kpi-reporters-sub').textContent = reporters === t ? '전원 상이인' : `${reporters}명`;
+  }
+
+  // -- Status Donut --
+  renderStatusChart() {
+    const counts = {}; ALL_STATUSES.forEach(s=>{counts[s]=0;});
+    this.filtered.forEach(c => { if(counts[c.status]!==undefined) counts[c.status]++; });
+    const labels = ALL_STATUSES.filter(s=>counts[s]>0);
+    const data = labels.map(s=>counts[s]);
+    const colors = labels.map(s=>STATUS_COLORS[s]);
+
+    if (this.charts.status) this.charts.status.destroy();
+    this.charts.status = new Chart(document.getElementById('statusChart'), {
+      type:'doughnut', data: { labels, datasets:[{ data, backgroundColor:colors, borderWidth:0, hoverOffset:8 }] },
+      options: {
+        responsive:true, maintainAspectRatio:true, cutout:'60%',
+        plugins: { legend:{ position:'bottom', labels:{ padding:14, usePointStyle:true, font:{size:11} } } },
+        onClick: (e, els) => {
+          if (els.length) {
+            const status = labels[els[0].index];
+            document.getElementById('f-status').value = status;
+            this.applyFilters();
+          }
+        }
+      }
+    });
+  }
+
+  // -- Telecom Bar --
+  renderTelecomChart() {
+    const counts = {}; ALL_TELECOMS.forEach(t=>{counts[t]=0;});
+    this.filtered.forEach(c => { counts[c.telecom]++; });
+    const data = ALL_TELECOMS.map(t=>counts[t]);
+    const colors = ALL_TELECOMS.map(t=>TELECOM_COLORS[t]);
+
+    if (this.charts.telecom) this.charts.telecom.destroy();
+    this.charts.telecom = new Chart(document.getElementById('telecomChart'), {
+      type:'bar', data: { labels:ALL_TELECOMS, datasets:[{ label:'건수', data, backgroundColor:colors, borderRadius:6, barThickness:48 }] },
+      options: {
+        responsive:true, maintainAspectRatio:true,
+        plugins:{ legend:{display:false} },
+        scales:{ y:{beginAtZero:true,max:Math.max(5,...data)+1,ticks:{stepSize:1,font:{size:11}},grid:{color:'#f0f0f0'}}, x:{grid:{display:false},ticks:{font:{size:12,weight:'600'}}} },
+        onClick: (e, els) => {
+          if (els.length) {
+            const tc = ALL_TELECOMS[els[0].index];
+            document.getElementById('f-telecom').value = tc;
+            this.applyFilters();
+          }
+        }
+      }
+    });
+  }
+
+  // -- Cross-tab --
+  renderCrossTab() {
+    const container = document.getElementById('crosstab-container');
+    const matrix = {};
+    ALL_TELECOMS.forEach(t => { matrix[t] = {}; ALL_STATUSES.forEach(s => { matrix[t][s] = 0; }); });
+    this.filtered.forEach(c => { if(matrix[c.telecom] && matrix[c.telecom][c.status]!==undefined) matrix[c.telecom][c.status]++; });
+
+    let html = '<table class="crosstab"><thead><tr><th></th>';
+    ALL_STATUSES.forEach(s => { html += `<th>${s}</th>`; });
+    html += '<th>합계</th></tr></thead><tbody>';
+    const colTotals = {}; ALL_STATUSES.forEach(s=>{colTotals[s]=0;});
+    let grandTotal = 0;
+
+    ALL_TELECOMS.forEach(t => {
+      let rowTotal = 0;
+      html += `<tr><th style="text-align:left;">${t}</th>`;
+      ALL_STATUSES.forEach(s => {
+        const v = matrix[t][s];
+        rowTotal += v; colTotals[s] += v;
+        html += `<td${v>0?' class="highlight"':''}>${v}</td>`;
+      });
+      grandTotal += rowTotal;
+      html += `<td>${rowTotal}</td></tr>`;
+    });
+
+    html += '<tr><th style="text-align:left;">합계</th>';
+    ALL_STATUSES.forEach(s => { html += `<td>${colTotals[s]}</td>`; });
+    html += `<td>${grandTotal}</td></tr></tbody></table>`;
+    container.innerHTML = html;
+  }
+
+  // -- Stacked Bar (Telecom × Status) --
+  renderStackedChart() {
+    const matrix = {};
+    ALL_TELECOMS.forEach(t => { matrix[t] = {}; ALL_STATUSES.forEach(s => { matrix[t][s] = 0; }); });
+    this.filtered.forEach(c => { if(matrix[c.telecom]) matrix[c.telecom][c.status]++; });
+
+    const datasets = ALL_STATUSES.map(s => ({
+      label: s, data: ALL_TELECOMS.map(t => matrix[t][s]),
+      backgroundColor: STATUS_COLORS[s], borderRadius: 3
+    }));
+
+    if (this.charts.stacked) this.charts.stacked.destroy();
+    this.charts.stacked = new Chart(document.getElementById('stackedChart'), {
+      type:'bar', data: { labels:ALL_TELECOMS, datasets },
+      options: {
+        responsive:true, maintainAspectRatio:true,
+        plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true, padding:12, font:{size:11} } } },
+        scales:{ x:{stacked:true,grid:{display:false}}, y:{stacked:true,beginAtZero:true,ticks:{stepSize:1},grid:{color:'#f0f0f0'}} }
+      }
+    });
+  }
+
+  // -- Daily Trend --
+  renderDailyChart() {
+    const daily = {}; ALL_DATES.forEach(d=>{daily[d]=0;});
+    this.filtered.forEach(c => { if(daily[c.date]!==undefined) daily[c.date]++; });
+    const vals = ALL_DATES.map(d=>daily[d]);
+    let cum = 0; const cumVals = vals.map(v=>{cum+=v;return cum;});
+
+    if (this.charts.daily) this.charts.daily.destroy();
+    this.charts.daily = new Chart(document.getElementById('dailyChart'), {
+      type:'bar', data: {
+        labels: ALL_DATES.map(d=>d.slice(5).replace('-','/')),
+        datasets: [
+          { type:'line', label:'누적', data:cumVals, borderColor:'#6366f1', backgroundColor:'rgba(99,102,241,.08)', fill:true, tension:.3, pointRadius:4, pointBackgroundColor:'#6366f1', yAxisID:'y1', order:0 },
+          { type:'bar', label:'일별 접수', data:vals, backgroundColor:vals.map(v=>v>0?'#1a1a2e':'#e5e7eb'), borderRadius:4, barThickness:28, yAxisID:'y', order:1 }
+        ]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:true,
+        plugins:{ legend:{ position:'top', labels:{ padding:14, usePointStyle:true, font:{size:11} } } },
+        scales: {
+          y:{ beginAtZero:true, max:Math.max(4,...vals)+1, ticks:{stepSize:1,font:{size:11}}, grid:{color:'#f0f0f0'}, title:{display:true,text:'일별',font:{size:11}} },
+          y1:{ position:'right', beginAtZero:true, max:cum+2, ticks:{stepSize:2,font:{size:11}}, grid:{display:false}, title:{display:true,text:'누적',font:{size:11}} },
+          x:{ grid:{display:false}, ticks:{font:{size:11}} }
+        }
+      }
+    });
+  }
+
+  // -- Weekly Chart --
+  renderWeeklyChart() {
+    // Week 1: 3/4~3/9 (Mon-Sun), Week 2: 3/10~3/13+
+    const w1 = this.filtered.filter(c=>c.date>='2026-03-04'&&c.date<='2026-03-09').length;
+    const w2 = this.filtered.filter(c=>c.date>='2026-03-10'&&c.date<='2026-03-16').length;
+
+    if (this.charts.weekly) this.charts.weekly.destroy();
+    this.charts.weekly = new Chart(document.getElementById('weeklyChart'), {
+      type:'bar', data: {
+        labels:['1주차 (3/4~3/9)','2주차 (3/10~3/13)'],
+        datasets:[{ label:'접수 건수', data:[w1,w2], backgroundColor:['#94a3b8','#6366f1'], borderRadius:6, barThickness:56 }]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:true,
+        plugins:{
+          legend:{display:false},
+          tooltip:{ callbacks:{ afterLabel:(ctx)=>{ const prev = ctx.dataIndex===0 ? null : ctx.dataset.data[0]; if(!prev) return ''; const change = ((ctx.parsed.y-prev)/prev*100).toFixed(0); return `전주 대비 ${change>=0?'+':''}${change}%`; } } }
+        },
+        scales:{ y:{beginAtZero:true,ticks:{stepSize:1},grid:{color:'#f0f0f0'}}, x:{grid:{display:false}} }
+      }
+    });
+  }
+
+  // -- Rejection Rate Trend (3-day moving avg) --
+  renderRejectionTrend() {
+    const dailyTotal = {}; const dailyRej = {};
+    ALL_DATES.forEach(d=>{dailyTotal[d]=0;dailyRej[d]=0;});
+    // Use ALL cases (not filtered) for trend calculation
+    CASES.forEach(c => { dailyTotal[c.date]++; if(c.status==='반려') dailyRej[c.date]++; });
+
+    // Cumulative rejection rate
+    let cumTotal=0, cumRej=0;
+    const cumRates = ALL_DATES.map(d => {
+      cumTotal += dailyTotal[d]; cumRej += dailyRej[d];
+      return cumTotal>0 ? (cumRej/cumTotal*100) : 0;
+    });
+
+    if (this.charts.rejTrend) this.charts.rejTrend.destroy();
+    this.charts.rejTrend = new Chart(document.getElementById('rejectionTrendChart'), {
+      type:'line', data: {
+        labels: ALL_DATES.map(d=>d.slice(5).replace('-','/')),
+        datasets:[{
+          label:'누적 반려율 (%)', data:cumRates,
+          borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,.08)',
+          fill:true, tension:.3, pointRadius:4, pointBackgroundColor:'#ef4444'
+        }]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:true,
+        plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:(ctx)=>`반려율: ${ctx.parsed.y.toFixed(1)}%` } } },
+        scales: {
+          y:{ beginAtZero:true, max:100, ticks:{callback:v=>v+'%',font:{size:11}}, grid:{color:'#f0f0f0'} },
+          x:{ grid:{display:false}, ticks:{font:{size:11}} }
+        }
+      }
+    });
+  }
+
+  // -- Table --
+  sortBy(col) {
+    if (this.sortCol === col) { this.sortDir = this.sortDir==='asc'?'desc':'asc'; }
+    else { this.sortCol = col; this.sortDir = 'asc'; }
+    // Update header styles
+    document.querySelectorAll('.data-table th').forEach(th => {
+      th.classList.remove('sorted');
+      th.querySelector('.sort-icon') && (th.querySelector('.sort-icon').textContent = '▼');
+    });
+    const th = document.querySelector(`.data-table th[data-col="${col}"]`);
+    if (th) { th.classList.add('sorted'); const icon = th.querySelector('.sort-icon'); if(icon) icon.textContent = this.sortDir==='asc'?'▲':'▼'; }
+    this.renderTable();
+  }
+
+  renderTable() {
+    const sorted = [...this.filtered].sort((a,b) => {
+      let va = a[this.sortCol], vb = b[this.sortCol];
+      if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+      const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+      return this.sortDir === 'asc' ? cmp : -cmp;
+    });
+
+    document.getElementById('table-count').textContent = `${sorted.length}건`;
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = sorted.map(c => {
+      const tcClass = c.telecom==='LGU+' ? 'LGU' : c.telecom;
+      return `<tr onclick="DB.openCaseDetail(${c.no})" style="cursor:pointer;">
+        <td>${c.no}</td>
+        <td>${c.date}</td>
+        <td><span class="telecom-badge telecom-${tcClass}">${c.telecom}</span></td>
+        <td><span class="status-badge status-${c.status}">${c.status}</span></td>
+        <td>${c.note}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // -- Case Detail (from table click) --
+  openCaseDetail(no) {
+    const c = CASES.find(x=>x.no===no);
+    if (!c) return;
+    const title = document.getElementById('drill-title');
+    const body = document.getElementById('drill-body');
+    title.textContent = `사건 #${c.no} 상세`;
+
+    let html = '';
+    html += `<div class="detail-row"><span class="detail-label">접수번호</span><span class="detail-value">#${c.no}</span></div>`;
+    html += `<div class="detail-row"><span class="detail-label">접수일</span><span class="detail-value">${c.date}</span></div>`;
+    html += `<div class="detail-row"><span class="detail-label">통신사</span><span class="detail-value"><span class="telecom-badge telecom-${c.telecom==='LGU+'?'LGU':c.telecom}">${c.telecom}</span></span></div>`;
+    html += `<div class="detail-row"><span class="detail-label">상태</span><span class="detail-value"><span class="status-badge status-${c.status}">${c.status}</span></span></div>`;
+    html += `<div class="detail-row"><span class="detail-label">비고</span><span class="detail-value">${c.note||'—'}</span></div>`;
+
+    // Same-telecom cases
+    const sameTc = CASES.filter(x=>x.telecom===c.telecom && x.no!==c.no);
+    if (sameTc.length) {
+      html += `<h4 style="font-size:13px;margin:16px 0 8px;color:#444;">동인 통신사(${c.telecom}) 다른 건</h4>`;
+      sameTc.forEach(x => {
+        html += `<div class="detail-row"><span class="detail-label">#${x.no} · ${x.date}</span><span class="detail-value"><span class="status-badge status-${x.status}">${x.status}</span></span></div>`;
+      });
+    }
+
+    // Same-date cases
+    const sameDate = CASES.filter(x=>x.date===c.date && x.no!==c.no);
+    if (sameDate.length) {
+      html += `<h4 style="font-size:13px;margin:16px 0 8px;color:#444;">동인 접수일(${c.date}) 다른 건</h4>`;
+      sameDate.forEach(x => {
+        html += `<div class="detail-row"><span class="detail-label">#${x.no} · ${x.telecom}</span><span class="detail-value"><span class="status-badge status-${x.status}">${x.status}</span></span></div>`;
+      });
+    }
+
+    body.innerHTML = html;
+    document.getElementById('drill-panel').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+  }
+
+  // -- Analysis --
+  renderAnalysis() {
+    const d = this.filtered; const t = d.length;
+    const complete = d.filter(c=>c.status==='검증완료').length;
+    const rej = d.filter(c=>c.status==='반려').length;
+    const supp = d.filter(c=>c.status==='보완요청').length;
+    const rejRate = t ? (rej/t*100).toFixed(1) : 0;
+    const days = ALL_DATES.length;
+    const avg = (t/days).toFixed(1);
+
+    const w1 = d.filter(c=>c.date<='2026-03-09').length;
+    const w2 = d.filter(c=>c.date>='2026-03-10').length;
+    const weekChange = w1>0 ? (((w2-w1)/w1)*100).toFixed(0) : 'N/A';
+
+    let html = '';
+    html += `<p><strong>필터 적용 결과: ${t}건</strong> (전체 ${CASES.length}건 중). 일평귰 약 ${avg}건으로 `;
+    html += t === CASES.length ? '초기 an차 다계입니다.' : '해당 조건의 접수 현황입니다.';
+    html += '</p>';
+    html += `<p>반려윆 ${rejRate}% (${rej}/${t})`;
+    html += parseFloat(rejRate) > 50 ? '뢔 높은 편이뮰, 요건 미충조 건 다수입니다.' : '입니다.';
+    html += '</p>';
+    if (complete > 0) html += `<p>검증완료 ${complete}건으로 유효 신고가 확인옐습니다.</p>`;
+    if (w1 > 0 && weekChange !== 'N/A') html += `<p>2주차 접수럏이 1주차 대비 ${weekChange>=0?'+':''}${weekChange}% 변화를 보입니다.</p>`;
+    if (supp > 0) html += `<p class="warning">⚠ 미처리 작건: 보완요청 ${supp}건 — 조셝한 처리 필요</p>`;
+
+    document.getElementById('analysis-content').innerHTML = html;
+  }
+}
+
+// === Init ===
+const DB = new Dashboard();
 </script>
 </body>
 </html>
