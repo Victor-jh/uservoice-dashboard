@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ì´ì©ì ì°¸ì¬ ì ê³ ì ë â íµê³ ëìë³´ë</title>
+<title>이용자 참여 신고제도 — 통계 대시보드</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -133,11 +133,11 @@
     font-size: 11px;
     font-weight: 600;
   }
-  .status-ê²ì¦ìë£ { background: #d1fae5; color: #065f46; }
-  .status-ë³´ììì²­ { background: #fef3c7; color: #92400e; }
-  .status-ë°ë ¤ { background: #fee2e2; color: #991b1b; }
-  .status-ì ì { background: #dbeafe; color: #1e40af; }
-  .status-ê²ì¦ì¤ { background: #e0e7ff; color: #3730a3; }
+  .status-검증완료 { background: #d1fae5; color: #065f46; }
+  .status-보완요청 { background: #fef3c7; color: #92400e; }
+  .status-반려 { background: #fee2e2; color: #991b1b; }
+  .status-접수 { background: #dbeafe; color: #1e40af; }
+  .status-검증중 { background: #e0e7ff; color: #3730a3; }
 
   .telecom-badge {
     display: inline-block;
@@ -167,10 +167,10 @@
 
 <div class="header">
   <div>
-    <h1>ì´ì©ì ì°¸ì¬ ì ê³ ì ë â ì´ì ëìë³´ë</h1>
-    <div class="date">2026ë 3ì 13ì¼ ê¸°ì¤ Â· ì¤ìê° API ë°ì´í°</div>
+    <h1>이용자 참여 신고제도 — 운영 대시보드</h1>
+    <div class="date">2026년 3월 13일 기준 · 실시간 API 데이터</div>
   </div>
-  <div class="badge">ë°ì¹­ D+10 Â· íì¤í¸ê±´ ì ì¸</div>
+  <div class="badge">런칭 D+10 · 테스트건 제외</div>
 </div>
 
 <div class="container">
@@ -178,102 +178,102 @@
   <!-- KPI Cards -->
   <div class="kpi-row">
     <div class="kpi-card total">
-      <div class="label">ì´ ì ì</div>
+      <div class="label">총 접수</div>
       <div class="value">8</div>
-      <div class="sub">ì¼íê·  0.9ê±´ (3/4~)</div>
+      <div class="sub">일평균 0.9건 (3/4~)</div>
     </div>
     <div class="kpi-card complete">
-      <div class="label">ê²ì¦ìë£</div>
+      <div class="label">검증완료</div>
       <div class="value">2</div>
       <div class="sub">25.0%</div>
     </div>
     <div class="kpi-card supplement">
-      <div class="label">ë³´ììì²­</div>
+      <div class="label">보완요청</div>
       <div class="value">1</div>
       <div class="sub">12.5%</div>
     </div>
     <div class="kpi-card rejected">
-      <div class="label">ë°ë ¤</div>
+      <div class="label">반려</div>
       <div class="value">5</div>
       <div class="sub">62.5%</div>
     </div>
     <div class="kpi-card reporters">
-      <div class="label">ì ê³ ì ì</div>
+      <div class="label">신고자 수</div>
       <div class="value">8</div>
-      <div class="sub">ì ì ìì´ì¸</div>
+      <div class="sub">전원 상이인</div>
     </div>
   </div>
 
   <!-- Charts -->
   <div class="chart-grid">
-    <!-- ìíë³ ëë -->
+    <!-- 상태별 도넛 -->
     <div class="chart-card">
-      <h3>ìíë³ ë¶í¬</h3>
+      <h3>상태별 분포</h3>
       <canvas id="statusChart"></canvas>
     </div>
 
-    <!-- íµì ì¬ë³ -->
+    <!-- 통신사별 -->
     <div class="chart-card">
-      <h3>íµì ì¬ë³ ë¶í¬</h3>
+      <h3>통신사별 분포</h3>
       <canvas id="telecomChart"></canvas>
     </div>
 
-    <!-- ì¼ë³ ì ì ì¶ì´ -->
+    <!-- 일별 접수 추이 -->
     <div class="chart-card chart-full">
-      <h3>ì¼ë³ ì ì ì¶ì´ (2026ë 3ì)</h3>
+      <h3>일별 접수 추이 (2026년 3월)</h3>
       <canvas id="dailyChart"></canvas>
     </div>
   </div>
 
-  <!-- ê°ë³ ê±´ íì´ë¸ -->
+  <!-- 개별 건 테이블 -->
   <div class="table-card">
-    <h3>ì ê³  ëª©ë¡ (8ê±´, íì¤í¸ê±´ ì ì¸)</h3>
+    <h3>신고 목록 (8건, 테스트건 제외)</h3>
     <table>
       <thead>
         <tr>
           <th>#</th>
-          <th>ì ìì¼</th>
-          <th>íµì ì¬</th>
-          <th>ìí</th>
-          <th>ë¹ê³ </th>
+          <th>접수일</th>
+          <th>통신사</th>
+          <th>상태</th>
+          <th>비고</th>
         </tr>
       </thead>
       <tbody>
-        <tr><td>1</td><td>2026-03-04</td><td><span class="telecom-badge telecom-KT">KT</span></td><td><span class="status-badge status-ë°ë ¤">ë°ë ¤</span></td><td></td></tr>
-        <tr><td>2</td><td>2026-03-05</td><td><span class="telecom-badge telecom-LGU">LGU+</span></td><td><span class="status-badge status-ë°ë ¤">ë°ë ¤</span></td><td></td></tr>
-        <tr><td>3</td><td>2026-03-08</td><td><span class="telecom-badge telecom-SKT">SKT</span></td><td><span class="status-badge status-ë°ë ¤">ë°ë ¤</span></td><td></td></tr>
-        <tr><td>4</td><td>2026-03-09</td><td><span class="telecom-badge telecom-KT">KT</span></td><td><span class="status-badge status-ë°ë ¤">ë°ë ¤</span></td><td></td></tr>
-        <tr><td>5</td><td>2026-03-11</td><td><span class="telecom-badge telecom-LGU">LGU+</span></td><td><span class="status-badge status-ê²ì¦ìë£">ê²ì¦ìë£</span></td><td>ì í¨ ì ê³ </td></tr>
-        <tr><td>6</td><td>2026-03-11</td><td><span class="telecom-badge telecom-SKT">SKT</span></td><td><span class="status-badge status-ê²ì¦ìë£">ê²ì¦ìë£</span></td><td>ì í¨ ì ê³ </td></tr>
-        <tr><td>7</td><td>2026-03-12</td><td><span class="telecom-badge telecom-KT">KT</span></td><td><span class="status-badge status-ë°ë ¤">ë°ë ¤</span></td><td></td></tr>
-        <tr><td>8</td><td>2026-03-12</td><td><span class="telecom-badge telecom-LGU">LGU+</span></td><td><span class="status-badge status-ë³´ììì²­">ë³´ììì²­</span></td><td>ë¯¸ì²ë¦¬ ìê±´</td></tr>
+        <tr><td>1</td><td>2026-03-04</td><td><span class="telecom-badge telecom-KT">KT</span></td><td><span class="status-badge status-반려">반려</span></td><td></td></tr>
+        <tr><td>2</td><td>2026-03-05</td><td><span class="telecom-badge telecom-LGU">LGU+</span></td><td><span class="status-badge status-반려">반려</span></td><td></td></tr>
+        <tr><td>3</td><td>2026-03-08</td><td><span class="telecom-badge telecom-SKT">SKT</span></td><td><span class="status-badge status-반려">반려</span></td><td></td></tr>
+        <tr><td>4</td><td>2026-03-09</td><td><span class="telecom-badge telecom-KT">KT</span></td><td><span class="status-badge status-반려">반려</span></td><td></td></tr>
+        <tr><td>5</td><td>2026-03-11</td><td><span class="telecom-badge telecom-LGU">LGU+</span></td><td><span class="status-badge status-검증완료">검증완료</span></td><td>유효 신고</td></tr>
+        <tr><td>6</td><td>2026-03-11</td><td><span class="telecom-badge telecom-SKT">SKT</span></td><td><span class="status-badge status-검증완료">검증완료</span></td><td>유효 신고</td></tr>
+        <tr><td>7</td><td>2026-03-12</td><td><span class="telecom-badge telecom-KT">KT</span></td><td><span class="status-badge status-반려">반려</span></td><td></td></tr>
+        <tr><td>8</td><td>2026-03-12</td><td><span class="telecom-badge telecom-LGU">LGU+</span></td><td><span class="status-badge status-보완요청">보완요청</span></td><td>미처리 잔건</td></tr>
       </tbody>
     </table>
   </div>
 
-  <!-- ìì½ ë¶ì -->
+  <!-- 요약 분석 -->
   <div class="table-card">
-    <h3>ì¢í© ë¶ì</h3>
+    <h3>종합 분석</h3>
     <div style="font-size:14px; line-height:1.8; color:#444;">
-      <p><strong>ì ë ë°ì¹­ í ì¤ì  ì ê³  8ê±´ ì ì</strong> (ìµì´ íì¤í¸ê±´ 1ê±´ ì ì¸). 3/4ë¶í° ê¸°ì° ì ì¼íê·  ì½ 0.9ê±´ì¼ë¡ ì´ê¸° ìì°© ë¨ê³ìëë¤.</p>
-      <p style="margin-top:8px;">ë°ë ¤ì¨ 62.5% (5/8)ë¡ ëì í¸ì´ë, ìê±´ ë¯¸ì¶©ì¡± ê±´ì´ ë¤ììëë¤. 3/11 ì´í ì í¨ ì ê³ (ê²ì¦ìë£)ê° ëì¤ê¸° ììíì¼ë©°, ìµê·¼ ì¼ ì ìëì´ 2ê±´ì¼ë¡ ì¦ê°ì¸ë¥¼ ë³´ì´ê³  ììµëë¤.</p>
-      <p style="margin-top:8px;">íµì ì¬ë³ë¡ë KT 3ê±´, LGU+ 3ê±´, SKT 2ê±´ì¼ë¡ ë¹êµì  ê³ ë¥´ê² ë¶í¬ëì´ ììµëë¤.</p>
-      <p style="margin-top:8px; color:#f59e0b;"><strong>â  ë¯¸ì²ë¦¬ ìê±´: ë³´ììì²­ 1ê±´</strong> â ì¡°ìí ì²ë¦¬ íì</p>
+      <p><strong>제도 런칭 후 실제 신고 8건 접수</strong> (최초 테스트건 1건 제외). 3/4부터 기산 시 일평균 약 0.9건으로 초기 안착 단계입니다.</p>
+      <p style="margin-top:8px;">반려율 62.5% (5/8)로 높은 편이나, 요건 미충족 건이 다수입니다. 3/11 이후 유효 신고(검증완료)가 나오기 시작했으며, 최근 일 접수량이 2건으로 증가세를 보이고 있습니다.</p>
+      <p style="margin-top:8px;">통신사별로는 KT 3건, LGU+ 3건, SKT 2건으로 비교적 고르게 분포되어 있습니다.</p>
+      <p style="margin-top:8px; color:#f59e0b;"><strong>⚠ 미처리 잔건: 보완요청 1건</strong> — 조속한 처리 필요</p>
     </div>
   </div>
 
 </div>
 
 <div class="footer">
-  ì´ì©ì ì°¸ì¬ ì ê³ ì ë ì´ì ëìë³´ë Â· íêµ­íµì ì´ì©ìë³´í¸íí Â· ë°ì´í° ê¸°ì¤: 2026-03-13 17:18 KST
+  이용자 참여 신고제도 운영 대시보드 · 한국통신이용자보호협회 · 데이터 기준: 2026-03-13 17:18 KST
 </div>
 
 <script>
-// ìíë³ ëë
+// 상태별 도넛
 new Chart(document.getElementById('statusChart'), {
   type: 'doughnut',
   data: {
-    labels: ['ë°ë ¤', 'ê²ì¦ìë£', 'ë³´ììì²­'],
+    labels: ['반려', '검증완료', '보완요청'],
     datasets: [{
       data: [5, 2, 1],
       backgroundColor: ['#ef4444', '#10b981', '#f59e0b'],
@@ -291,13 +291,13 @@ new Chart(document.getElementById('statusChart'), {
   }
 });
 
-// íµì ì¬ë³ ë°
+// 통신사별 바
 new Chart(document.getElementById('telecomChart'), {
   type: 'bar',
   data: {
     labels: ['SKT', 'KT', 'LGU+'],
     datasets: [{
-      label: 'ì ê³  ê±´ì',
+      label: '신고 건수',
       data: [2, 3, 3],
       backgroundColor: ['#ef4444', '#3b82f6', '#ec4899'],
       borderRadius: 6,
@@ -320,7 +320,7 @@ new Chart(document.getElementById('telecomChart'), {
   }
 });
 
-// ì¼ë³ ì ì ì¶ì´
+// 일별 접수 추이
 const allDates = [];
 const startDate = new Date('2026-03-04');
 const endDate = new Date('2026-03-13');
@@ -330,7 +330,7 @@ for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
 const dailyData = { '03-04': 1, '03-05': 1, '03-06': 0, '03-07': 0, '03-08': 1, '03-09': 1, '03-10': 0, '03-11': 2, '03-12': 2, '03-13': 0 };
 const dailyValues = allDates.map(d => dailyData[d] || 0);
 
-// ëì 
+// 누적
 let cumulative = 0;
 const cumulativeValues = dailyValues.map(v => { cumulative += v; return cumulative; });
 
@@ -341,7 +341,7 @@ new Chart(document.getElementById('dailyChart'), {
     datasets: [
       {
         type: 'line',
-        label: 'ëì  ê±´ì',
+        label: '누적 건수',
         data: cumulativeValues,
         borderColor: '#6366f1',
         backgroundColor: 'rgba(99,102,241,0.1)',
@@ -354,7 +354,7 @@ new Chart(document.getElementById('dailyChart'), {
       },
       {
         type: 'bar',
-        label: 'ì¼ë³ ì ì',
+        label: '일별 접수',
         data: dailyValues,
         backgroundColor: dailyValues.map(v => v > 0 ? '#1a1a2e' : '#e5e7eb'),
         borderRadius: 4,
@@ -376,7 +376,7 @@ new Chart(document.getElementById('dailyChart'), {
         max: 4,
         ticks: { stepSize: 1, font: { size: 11 } },
         grid: { color: '#f0f0f0' },
-        title: { display: true, text: 'ì¼ë³ ê±´ì', font: { size: 11 } }
+        title: { display: true, text: '일별 건수', font: { size: 11 } }
       },
       y1: {
         position: 'right',
@@ -384,7 +384,7 @@ new Chart(document.getElementById('dailyChart'), {
         max: 9,
         ticks: { stepSize: 2, font: { size: 11 } },
         grid: { display: false },
-        title: { display: true, text: 'ëì  ê±´ì', font: { size: 11 } }
+        title: { display: true, text: '누적 건수', font: { size: 11 } }
       },
       x: { grid: { display: false }, ticks: { font: { size: 11 } } }
     }
