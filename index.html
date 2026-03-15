@@ -63,7 +63,7 @@ body { font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif; backg
 .chart-card h3 { font-size:13px; font-weight:600; color:#444; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center; }
 .chart-card canvas { max-height:260px; }
 .chart-full { grid-column:1/-1; }
-.chart-empty { display:flex; align-items:center; justify-content:center; height:20 opacity:0; ccc; font-size:14px; }
+.chart-empty { display:flex; align-items:center; justify-content:center; height:200px; color:#ccc; font-size:14px; }
 
 /* Cross-tab */
 .crosstab { width:100%; border-collapse:collapse; font-size:13px; margin-top:8px; }
@@ -125,12 +125,12 @@ table.data-table tr.highlighted td { background:#eef2ff; }
 /* Tooltip override */
 .chart-click-hint { font-size:10px; color:#bbb; font-weight:400; }
 
-@media (max-width:90 op) {
+@media (max-width:900px) {
   .kpi-row { grid-template-columns:repeat(3,1fr); }
   .chart-grid { grid-template-columns:1fr; }
   .drill-panel { width:100%; }
 }
-@media (max-width:60 op) {
+@media (max-width:600px) {
   .kpi-row { grid-template-columns:repeat(2,1fr); }
   .filter-bar { flex-direction:column; align-items:stretch; }
 }
@@ -296,7 +296,7 @@ table.data-table tr.highlighted td { background:#eef2ff; }
 </div>
 
 <div class="footer">
-  이용자 참여 신고제도 운영 대시보드 · 한국통신이용자보호협회 · 2026-03-15 기준
+  이용자 참여 신고제도 운영 대시보드 · 한국통술이용자보호협회 · 2026-03-15 기준
 </div>
 
 <script>
@@ -803,7 +803,7 @@ class Dashboard {
 
     let html = '';
     html += `<p><strong>필터 적용 결과: ${t}건</strong> (전체 ${CASES.length}건 중). 일평균 약 ${avg}건으로 `;
-    html += t === CASES.length ? '초기 안착 단계입니다.' : '해당 조건의 접수 현황입니다.';
+    html += t === CASES.length ? '초기 안차 단계입니다.' : '해당 조건의 접수 현황입니다.';
     html += '</p>';
     html += `<p>반려율 ${rejRate}% (${rej}/${t})`;
     html += parseFloat(rejRate) > 50 ? '로 높은 편이며, 요건 미충족 건 다수입니다.' : '입니다.';
