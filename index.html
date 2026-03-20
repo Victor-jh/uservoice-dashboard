@@ -142,9 +142,9 @@ table.data-table tr.highlighted td { background:#eef2ff; }
 <div class="header">
   <div>
     <h1>이용자 참여 신고제도 — 운영 대시보드</h1>
-    <div class="date">2026년 3월 19일 기준 · 스냅샷 데이터</div>
+    <div class="date">2026년 3월 20일 기준 · 스냅샷 데이터</div>
   </div>
-  <div class="badge">런칭 D+16 · 테스트건 제외</div>
+  <div class="badge">런칭 D+17 · 테스트건 제외</div>
 </div>
 
 <div class="container">
@@ -173,8 +173,9 @@ table.data-table tr.highlighted td { background:#eef2ff; }
     <div class="filter-group">
       <label>기간</label>
       <input type="date" id="f-start" value="2026-03-03" onchange="DB.applyFilters()">
+
       <span style="color:#aaa;">~</span>
-      <input type="date" id="f-end" value="2026-03-15" onchange="DB.applyFilters()">
+      <input type="date" id="f-end" value="2026-03-20" onchange="DB.applyFilters()">
     </div>
     <span class="active-filters" id="active-filters"></span>
     <button class="filter-reset" onclick="DB.resetFilters()">초기화</button>
@@ -297,7 +298,7 @@ table.data-table tr.highlighted td { background:#eef2ff; }
 </div>
 
 <div class="footer">
-  이용자 참여 신고제도 운영 대시보드 · 한국통신이용자보호협회 · 2026-03-15 기준
+  이용자 참여 신고제도 운영 대시보드 · 한국통신이용자보호협회 · 2026-03-20 기준
 </div>
 
 <script>
@@ -329,7 +330,7 @@ function dateRange(start, end) {
   while (d <= new Date(end)) { dates.push(d.toISOString().slice(0,10)); d.setDate(d.getDate()+1); }
   return dates;
 }
-const ALL_DATES = dateRange('2026-03-03','2026-03-19');
+const ALL_DATES = dateRange('2026-03-03','2026-03-20');
 
 // === DASHBOARD CLASS ===
 class Dashboard {
@@ -368,7 +369,7 @@ class Dashboard {
     let count = 0;
     if (f.telecom) count++;
     if (f.status) count++;
-    if (f.dateStart !== '2026-03-04' || f.dateEnd !== '2026-03-13') count++;
+    if (f.dateStart !== '2026-03-03' || f.dateEnd !== '2026-03-20') count++;
     document.getElementById('active-filters').textContent = count ? `필터 ${count}개 적용 중` : '';
     this.activeKPI = null;
     document.querySelectorAll('.kpi-card').forEach(el => el.classList.remove('active'));
@@ -378,8 +379,8 @@ class Dashboard {
   resetFilters() {
     document.getElementById('f-telecom').value = 'all';
     document.getElementById('f-status').value = 'all';
-    document.getElementById('f-start').value = '2026-03-04';
-    document.getElementById('f-end').value = '2026-03-13';
+    document.getElementById('f-start').value = '2026-03-03';
+    document.getElementById('f-end').value = '2026-03-20';
     this.applyFilters();
   }
 
